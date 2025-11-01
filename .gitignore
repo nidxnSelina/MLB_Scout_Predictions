@@ -1,2 +1,30 @@
+# --- Python environment ---
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.ipynb_checkpoints
+
+# --- Data files ---
+*.csv
+
+# --- Logs / temp files ---
+*.log
+*.tmp
+*.bak
+*.swp
+
+# --- OS junk ---
 .DS_Store
-data/
+
+# --- Build / packaging / Docker ---
+*.egg-info/
+dist/
+build/
+.env
+docker-compose.yml
+
+# --- IDEs / editors ---
+.vscode/
+.idea/
