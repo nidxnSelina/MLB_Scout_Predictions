@@ -47,7 +47,7 @@ docker build -t titanic-python .
 
 ### Run container
 ```
-docker run --rm titanic-python
+docker run --rm -v "$PWD":/app titanic-python
 ```
 
 Output:

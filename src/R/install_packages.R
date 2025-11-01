@@ -2,7 +2,7 @@ packages <- c(
   "readr",  
   "dplyr",    
   "caret",    
-  "rpart" 
+  "rpart"
 )
 
 install_if_missing <- function(pkg) {
