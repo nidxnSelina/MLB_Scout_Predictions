@@ -1,6 +1,6 @@
 # MLDS 400 HW3: Titanic Disaster Survival Prediction
 
-This project builds a binary classification model to predict passenger survival on the Titanic using the Kaggle Titanic dataset ([Titanic: Machine Learning from Disaster](https://www.kaggle.com/competitions/titanic/code)). Logistic regression model is used. The scripts perform data cleaning, train a logistic regression model, report training accuracy, and save predictions on the test set to a CSV file.
+This project builds a binary classification model to predict passenger survival on the Titanic using the Kaggle Titanic dataset ([Titanic: Machine Learning from Disaster](https://www.kaggle.com/competitions/titanic/code)). Logistic regression model is used. The scripts perform data cleaning, train a logistic regression model, report training accuracy, and save predictions on the test set to a CSV file. This repository supports running both locally and on Docker using either Python or R.
 
 ## Prerequisites
 - Install Docker.
@@ -41,10 +41,10 @@ Output:
 ```https://github.com/nidxnSelina/Titanic-Disaster-Predictions.git```
 
 ### Build Docker image
-docker build -t titanic-student .
+```docker build -t titanic-student .```
 
 ### Run container
-docker run --rm titanic-student
+```docker run --rm titanic-student```
 
 Output:
 - training accuracy
@@ -57,10 +57,10 @@ Output:
 ```https://github.com/nidxnSelina/Titanic-Disaster-Predictions.git```
 
 ### Build Docker image
-docker build -t titanic-r -f src/R/Dockerfile .
+```docker build -t titanic-r -f src/R/Dockerfile .```
 
 ### Run container
-docker run --rm -v "$PWD/src/data":/app/data titanic-r
+```docker run --rm -v "$PWD/src/data":/app/data titanic-r```
 
 Output:
 - training accuracy
