@@ -10,16 +10,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# copy ONLY requirements first
-COPY requirements.txt .
+WORKDIR /app
 
-# install python deps
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy the rest of the repo. this will bring in src/, including src/data/*.csv
 COPY . .
 
-# default command: run your pipeline
-#    this assumes main.py reads src/data/train.csv and src/data/test.csv
-#    and writes src/data/survival_predictions.csv
-CMD ["python", "src/python/run.py"]
+CMD ["python", "src/python/main.py"]
+

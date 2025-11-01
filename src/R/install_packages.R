@@ -1,8 +1,8 @@
 packages <- c(
-  "readr",     # to read csv
-  "dplyr",     # data wrangling
-  "caret",     # modeling helper
-  "rpart"      # simple model, or use glm
+  "readr",  
+  "dplyr",    
+  "caret",    
+  "rpart" 
 )
 
 install_if_missing <- function(pkg) {

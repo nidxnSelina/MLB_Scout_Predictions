@@ -15,7 +15,7 @@ if (!file.exists(test_path)) {
 train_df <- read_csv(train_path, show_col_types = FALSE)
 test_df  <- read_csv(test_path, show_col_types = FALSE)
 
-# data preprocessing
+# -------------------- preprocess data --------------------
 # drop unusable columns
 drop_cols <- c("Name", "Ticket", "Cabin")
 train_df <- train_df[, setdiff(names(train_df), drop_cols)]
@@ -75,17 +75,21 @@ test_passenger_ids <- test_df$PassengerId
 pred_probs <- predict(model, newdata = test_df, type = "response")
 pred_labels <- ifelse(pred_probs >= 0.5, 1, 0)
 
-# print goodness of fit on test set (confidence proxy)
-avg_max_prob <- mean(pmax(pred_probs, 1 - pred_probs))
-message(paste("[TEST Goodness of Fit avg max prob] =", round(avg_max_prob,4)))
-
-# save predictions
 out_df <- data.frame(
   PassengerId = test_passenger_ids,
   Survived = pred_labels
 )
 
+# evaluate and print accuracy on test set
+gender_path  <- "data/gender_submission.csv"
+answers <- read.csv(gender_path)
+
+merged <- merge(out_df, answers, by = "PassengerId")
+
+test_accuracy <- mean(merged$Survived.x == merged$Survived.y)
+cat(sprintf("[INFO] Test Accuracy: %.4f\n", test_accuracy))
+
+# save predictions
 out_path <- "data/survival_predictions_r.csv"
 write_csv(out_df, out_path)
 message(paste("Predictions saved to", out_path))
-

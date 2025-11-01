@@ -7,40 +7,48 @@ from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-# Functions to load training and test data
+
 def load_training_data():
+    """
+    Load train set
+
+    """
     this_dir = os.path.dirname(os.path.abspath(__file__))
     train_path = os.path.join(this_dir, "..", "data", "train.csv")
     train_path = os.path.abspath(train_path)
-    print(f"[INFO] loading training data from: {train_path}")
-
     if not os.path.exists(train_path):
         raise FileNotFoundError(f"[ERROR] could not find file at {train_path}")
 
     df = pd.read_csv(train_path)
     print(f"[INFO] training data loaded. shape={df.shape}")
+
     return df
 
+
 def load_test_data():
+    """
+    Load test set
+    
+    """
     this_dir = os.path.dirname(os.path.abspath(__file__))
     test_path = os.path.join(this_dir, "..", "data", "test.csv")
     test_path = os.path.abspath(test_path)
-
-    print(f"[INFO] loading test data from: {test_path}")
-
     if not os.path.exists(test_path):
         raise FileNotFoundError(f"[ERROR] could not find file at {test_path}")
 
     df = pd.read_csv(test_path)
     print(f"[INFO] test data loaded. shape={df.shape}")
     print(f"[INFO] columns: {list(df.columns)}")
+
     return df
 
 
-# Preprocessing functions
 def preprocess_titanic_train(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series | None, pd.Series | None]:
-
-    # keep id OUT of features but return it
+    """
+    Preprocess the train set
+    
+    """
+    # keep id out of features but return it
     passenger_ids = df["PassengerId"].copy() if "PassengerId" in df.columns else None
 
     # detect train vs test
@@ -54,7 +62,7 @@ def preprocess_titanic_train(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series 
     drop_cols = [c for c in ["PassengerId", "Name", "Ticket", "Cabin", "Survived"] if c in X.columns]
     X = X.drop(columns=drop_cols)
 
-    # ---- imputations ----
+    # ---------------- imputations ----------------
     # Age
     if "Age" in X.columns and X["Age"].isna().any():
         X["Age"] = X["Age"].fillna(X["Age"].median())
@@ -67,7 +75,7 @@ def preprocess_titanic_train(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series 
     if "Embarked" in X.columns and X["Embarked"].isna().any():
         X["Embarked"] = X["Embarked"].fillna(X["Embarked"].mode()[0])
 
-    # ---- encoding ----
+    # ---------------- encoding ----------------
     # Sex -> binary
     if "Sex" in X.columns:
         X["Sex"] = X["Sex"].map({"male": 0, "female": 1}).astype(int)
@@ -96,9 +104,11 @@ def preprocess_titanic_train(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series 
     return X, y, passenger_ids
 
 
-
 def preprocess_titanic_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-
+    """
+    Preprocess the test set
+    
+    """
     # keep PassengerId for later submission
     passenger_ids = df["PassengerId"].copy() if "PassengerId" in df.columns else None
 
@@ -109,7 +119,7 @@ def preprocess_titanic_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     drop_cols = [c for c in ["PassengerId", "Name", "Ticket", "Cabin"] if c in X.columns]
     X = X.drop(columns=drop_cols)
 
-    # ---- imputations ----
+    # ---------------- imputations ----------------
     if "Age" in X.columns and X["Age"].isna().any():
         X["Age"] = X["Age"].fillna(X["Age"].median())
 
@@ -119,7 +129,7 @@ def preprocess_titanic_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     if "Embarked" in X.columns and X["Embarked"].isna().any():
         X["Embarked"] = X["Embarked"].fillna(X["Embarked"].mode()[0])
 
-    # ---- encoding ----
+    # ---------------- encoding ----------------
     if "Sex" in X.columns:
         X["Sex"] = X["Sex"].map({"male": 0, "female": 1}).astype(int)
 
@@ -144,14 +154,12 @@ def preprocess_titanic_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     return X, passenger_ids
 
 
-
-# Model training function
 def train_titanic_model(X_train: pd.DataFrame, y_train: pd.Series) -> Pipeline:
     """
     Train a logistic regression model on cleaned Titanic data.
-    Returns a fitted sklearn Pipeline (with scaling + logistic regression).
+    
     """
-    # define pipeline: scaling + logistic regression
+    # scaling + logistic regression
     model = Pipeline([
         ('scaler', StandardScaler()),
         ('logreg', LogisticRegression(max_iter=1000, random_state=42))
@@ -166,18 +174,10 @@ def train_titanic_model(X_train: pd.DataFrame, y_train: pd.Series) -> Pipeline:
     return model
 
 
-# Prediction function
 def predict_titanic_survival(model: Pipeline, X_test: pd.DataFrame, test_ids: pd.Series) -> pd.DataFrame:
     """
     Predict Titanic survival on the test set and return submission DataFrame.
 
-    Args:
-        model: trained sklearn model
-        X_test: cleaned test features
-        test_ids: PassengerId column from test set
-    
-    Returns:
-        submission: pd.DataFrame with PassengerId and Survived (0/1)
     """
     # predict
     preds = model.predict(X_test)
@@ -186,55 +186,55 @@ def predict_titanic_survival(model: Pipeline, X_test: pd.DataFrame, test_ids: pd
         "Survived": preds.astype(int)
     })
 
-    # Goodness of fit proxy
-    probs = model.predict_proba(X_test)
-    avg_max_prob = np.mean(np.max(probs, axis=1))      # higher = more confident
-    entropy = -np.mean(np.sum(probs * np.log(probs + 1e-12), axis=1))  # lower = tighter predictions
-    print(f"[INFO] Test Goodness of fit - average max probability (confidence): {avg_max_prob:.4f}")
-    print(f"[INFO] Test Goodness of fit - entropy: {entropy:.4f}")
-
     return submission
+
+
+def evaluate_test_accuracy(prediction_df: pd.DataFrame) -> float:
+    """
+    Evaluate the model accuracy on test set by comparing with gender_submission.csv (ground truth)
+
+    """
+    # load correct answers
+    answer_path = os.path.join(os.path.dirname(__file__), "..", "data", "gender_submission.csv")
+    answer_path = os.path.abspath(answer_path)
+    answers = pd.read_csv(answer_path)
+
+    # merge on PassengerId
+    merged = prediction_df.merge(answers, on="PassengerId", suffixes=("_pred", "_true"))
+
+    return accuracy_score(merged["Survived_true"], merged["Survived_pred"])
 
 
 if __name__ == "__main__":
 
     # Load data
-    print("-----------------------------Loading Data-----------------------------")
+    print("-----------------------------Loading and Preprocessing Data-----------------------------")
     train_df = load_training_data()
     test_df = load_test_data() 
-    print("-----------------------------Data Loaded-----------------------------\n")
     
     # Preprocess data
-    print("\n---------------------------Preprocessing Data--------------------------")
     X_train, y_train, train_ids = preprocess_titanic_train(train_df)
-    print("[INFO] preprocessing training data completed.")
-    print(f'X_train (first few rows):\n{X_train.head()}')
-
     X_test, test_ids = preprocess_titanic_test(test_df)
-    print("[INFO] preprocessing test data completed.")
-    print(f'X_test (first few rows):\n{X_test.head()}')
-    print("-------------------------Data Preprocessing Done-----------------------\n")
+    print("Finished preprocessing data")
 
     # Train model
     print("-----------------------------Training Model----------------------------")
     model = train_titanic_model(X_train, y_train)
-    print("[INFO] Model training completed.")
-    print(model)
-    print("---------------------------Model Training Done-------------------------\n")
+    print("Model: ", model)
 
     # Predict on test set
     print("---------------------------Predicting on Test Set----------------------")
     prediction_df = predict_titanic_survival(model, X_test, test_ids)
-    print("[INFO] Prediction on test set completed.")
-    print(f'Predictions on test set (first few rows):\n{prediction_df.head()}')
+    test_accuracy = evaluate_test_accuracy(prediction_df)
+    print(f"[INFO] Test Accuracy: {test_accuracy:.4f}")
 
     # Save predictions to CSV
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    output_path = os.path.join(this_dir, "..", "data", "survival_predictions.csv")
+    output_path = os.path.join(this_dir, "..", "data", "survival_predictions_python.csv")
     output_path = os.path.abspath(output_path)    
     prediction_df.to_csv(output_path, index=False)
     print(f"[INFO] Predictions saved to: {output_path}")
-    print("------------------------Prediction on Test Set Done--------------------\n")
+    print("--------------------------------------------------------\n")
 
 
 

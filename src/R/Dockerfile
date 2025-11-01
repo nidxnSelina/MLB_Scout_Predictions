@@ -14,7 +14,7 @@ COPY src/R/install_packages.R ./install_packages.R
 RUN Rscript --vanilla install_packages.R
 
 # copy the runner
-COPY src/R/run.R ./run.R
+COPY src/R/main.R ./main.R
 
-# if run.R expects ./data, mount it at /app/data when running
-CMD ["Rscript", "--vanilla", "run.R"]
+# if main.R expects ./data, mount it at /app/data when running
+CMD ["Rscript", "--vanilla", "main.R"]
