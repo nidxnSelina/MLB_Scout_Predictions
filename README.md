@@ -42,12 +42,12 @@ Output:
 ## Run via Docker in Python
 ### Build Docker image
 ```
-docker build -t titanic-student .
+docker build -t titanic-python .
 ```
 
 ### Run container
 ```
-docker run --rm titanic-student
+docker run --rm titanic-python
 ```
 
 Output:

@@ -215,6 +215,7 @@ if __name__ == "__main__":
     # Preprocess data
     X_train, y_train, train_ids = preprocess_titanic_train(train_df)
     X_test, test_ids = preprocess_titanic_test(test_df)
+    print("Finished preprocessing data")
 
     # Train model
     print("-----------------------------Training Model----------------------------")
@@ -226,7 +227,6 @@ if __name__ == "__main__":
     prediction_df = predict_titanic_survival(model, X_test, test_ids)
     test_accuracy = evaluate_test_accuracy(prediction_df)
     print(f"[INFO] Test Accuracy: {test_accuracy:.4f}")
-    print(f'Predictions on test set (first few rows):\n{prediction_df.head()}')
 
     # Save predictions to CSV
     this_dir = os.path.dirname(os.path.abspath(__file__))
