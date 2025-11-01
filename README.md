@@ -8,10 +8,14 @@ This project builds a binary classification model to predict passenger survival 
 
 ## Run locally (Python)
 ### Install dependencies
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 ### Run model training and prediction
-```python src/python/run.py```
+```
+python src/python/run.py
+```
 
 Output:
 - training accuracy
