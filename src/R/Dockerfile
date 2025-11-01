@@ -1,26 +1,20 @@
-
 FROM r-base:4.4.0
 
-# make R non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# set workdir
-WORKDIR /app
-
-# system deps (for some R packages; keep minimal)
+# minimal system deps some R packages commonly need
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
+    libcurl4-openssl-dev libssl-dev libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# copy installer
-COPY install_packages.R /app/install_packages.R
-RUN Rscript /app/install_packages.R
+WORKDIR /app
 
-# copy main R script
-COPY main.R /app/main.R
+# install R packages
+COPY src/R/install_packages.R ./install_packages.R
+RUN Rscript --vanilla install_packages.R
 
-# default command: run the R script
-CMD ["Rscript", "/app/main.R"]
+# copy the runner
+COPY src/R/run.R ./run.R
 
+# if run.R expects ./data, mount it at /app/data when running
+CMD ["Rscript", "--vanilla", "run.R"]

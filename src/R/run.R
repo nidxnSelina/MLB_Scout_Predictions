@@ -1,11 +1,9 @@
-#!/usr/bin/env Rscript
-
 library(readr)
 library(dplyr)
 
-message("----- loading data -----")
-train_path <- "../data/train.csv"
-test_path  <- "../data/test.csv"
+# -------------------- load data --------------------
+train_path <- "data/train.csv"
+test_path  <- "data/test.csv"
 
 if (!file.exists(train_path)) {
   stop(paste("[ERROR] train file not found at", train_path))
@@ -17,7 +15,7 @@ if (!file.exists(test_path)) {
 train_df <- read_csv(train_path, show_col_types = FALSE)
 test_df  <- read_csv(test_path, show_col_types = FALSE)
 
-# basic cleaning similar to python version
+# data preprocessing
 # drop unusable columns
 drop_cols <- c("Name", "Ticket", "Cabin")
 train_df <- train_df[, setdiff(names(train_df), drop_cols)]
@@ -58,10 +56,7 @@ if ("Embarked" %in% names(train_df)) {
   test_df$Embarked  <- factor(test_df$Embarked, levels = levels(train_df$Embarked))
 }
 
-# ---------------- model ----------------
-message("----- training model -----")
-# simple logistic regression
-# Survived must be factor or numeric 0/1
+# ---------------- train model ----------------
 train_df$Survived <- as.integer(train_df$Survived)
 
 model <- glm(
@@ -70,17 +65,27 @@ model <- glm(
   family = binomial(link = "logit")
 )
 
-message("----- predicting -----")
+# print accuracy on train set
+train_preds <- ifelse(predict(model, newdata = train_df, type="response") >= 0.5, 1, 0)
+train_acc <- mean(train_preds == train_df$Survived)
+message(paste("[TRAIN ACCURACY] =", round(train_acc,4)))
+
+# ---------------- make predictions ----------------
 test_passenger_ids <- test_df$PassengerId
 pred_probs <- predict(model, newdata = test_df, type = "response")
 pred_labels <- ifelse(pred_probs >= 0.5, 1, 0)
 
+# print goodness of fit on test set (confidence proxy)
+avg_max_prob <- mean(pmax(pred_probs, 1 - pred_probs))
+message(paste("[TEST Goodness of Fit avg max prob] =", round(avg_max_prob,4)))
+
+# save predictions
 out_df <- data.frame(
   PassengerId = test_passenger_ids,
   Survived = pred_labels
 )
 
-out_path <- "../data/survival_predictions_r.csv"
+out_path <- "data/survival_predictions_r.csv"
 write_csv(out_df, out_path)
-message(paste("saved predictions to", out_path))
+message(paste("Predictions saved to", out_path))
 
