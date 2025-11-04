@@ -9,12 +9,12 @@ This project builds a binary classification model to predict passenger survival 
 
 ## Run locally in Python
 ### Install dependencies
-```
+```bash
 pip install -r requirements.txt
 ```
 
 ### Run model training and prediction
-```
+```bash
 python src/python/run.py
 ```
 
@@ -25,12 +25,12 @@ Output:
 
 ## Run locally in R
 ### Install dependencies
-```
+```bash
 Rscript src/R/install_packages.R
 ```
 
 ### Run model training and prediction
-```
+```bash
 Rscript src/R/run.R
 ```
 
@@ -41,12 +41,12 @@ Output:
 
 ## Run via Docker in Python
 ### Build Docker image
-```
+```bash
 docker build -t titanic-python .
 ```
 
 ### Run container
-```
+```bash
 docker run --rm -v "$PWD":/app titanic-python
 ```
 
@@ -58,12 +58,12 @@ Output:
 
 ## Run via Docker in R
 ### Build Docker image
-```
+```bash
 docker build -t titanic-r -f src/R/Dockerfile .
 ```
 
 ### Run container
-```
+```bash
 docker run --rm -v "$PWD/src/data":/app/data titanic-r
 ```
 
